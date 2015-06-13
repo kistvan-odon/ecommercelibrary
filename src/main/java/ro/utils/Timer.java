@@ -26,7 +26,7 @@ public class Timer {
         endTime.add(Calendar.MILLISECOND, milliseconds);
     }
 
-    public boolean hasMoreTime(){
+    public boolean stillCounting(){
         return Calendar.getInstance().compareTo(endTime) < 0;
     }
 

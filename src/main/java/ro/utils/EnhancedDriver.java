@@ -9,6 +9,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import ro.constants.Time;
 
 import java.net.URL;
 import java.util.List;
@@ -62,7 +63,7 @@ public class EnhancedDriver extends RemoteWebDriver {
     public WebElement getElement(boolean asserted, By by, int seconds) {
         Timer timer = new Timer(seconds);
         implicitlyWaitOneSecond();
-        while (timer.hasMoreTime()) {
+        while (timer.stillCounting()) {
             try {
                 WebElement element = findElement(by);
                 implicitlyWaitDefault();
@@ -79,7 +80,7 @@ public class EnhancedDriver extends RemoteWebDriver {
     public WebElement getElement(boolean asserted, WebElement parentElement, By by, int seconds) {
         Timer timer = new Timer(seconds);
         implicitlyWaitOneSecond();
-        while (timer.hasMoreTime()) {
+        while (timer.stillCounting()) {
             try {
                 WebElement element = parentElement.findElement(by);
                 implicitlyWaitDefault();
@@ -102,7 +103,7 @@ public class EnhancedDriver extends RemoteWebDriver {
     public List<WebElement> getElements(boolean asserted, WebElement parentElement, By by, int seconds) {
         Timer timer = new Timer(seconds);
         implicitlyWaitOneSecond();
-        while (timer.hasMoreTime()) {
+        while (timer.stillCounting()) {
             try {
                 List<WebElement> elements = parentElement.findElements(by);
                 implicitlyWaitDefault();
@@ -126,7 +127,7 @@ public class EnhancedDriver extends RemoteWebDriver {
     public List<WebElement> getElements(boolean asserted, By by, int seconds) {
         Timer timer = new Timer(seconds);
         implicitlyWaitOneSecond();
-        while (timer.hasMoreTime()) {
+        while (timer.stillCounting()) {
             try {
                 List<WebElement> elements = findElements(by);
                 implicitlyWaitDefault();
@@ -143,7 +144,7 @@ public class EnhancedDriver extends RemoteWebDriver {
 
     public WebElement getElementContainingTerms(boolean asserted, WebElement parentElement, By by, boolean ignoreCase, int seconds, String... terms) {
         Timer timer = new Timer(seconds);
-        while (timer.hasMoreTime()) {
+        while (timer.stillCounting()) {
             List<WebElement> elements = getElements(asserted, parentElement, by, seconds);
             if (elements != null) {
                 implicitlyWaitOneSecond();
@@ -166,7 +167,7 @@ public class EnhancedDriver extends RemoteWebDriver {
 
     public WebElement getElementContainingTerms(boolean asserted, By by, boolean ignoreCase, int seconds, String... terms) {
         Timer timer = new Timer(seconds);
-        while (timer.hasMoreTime()) {
+        while (timer.stillCounting()) {
             List<WebElement> elements = getElements(asserted, by, seconds);
             LOG.debug("elements size: {}", elements.size());
             implicitlyWaitOneSecond();
@@ -189,7 +190,7 @@ public class EnhancedDriver extends RemoteWebDriver {
     public WebElement getElementContainingTermsInsideElement(boolean asserted, WebElement parentElement, By by, By elementWithText, boolean ignoreCase, int
             seconds, String... terms) {
         Timer timer = new Timer(seconds);
-        while (timer.hasMoreTime()) {
+        while (timer.stillCounting()) {
             List<WebElement> elements = getElements(asserted, parentElement, by, seconds);
             if (elements != null) {
                 implicitlyWaitOneSecond();
@@ -213,7 +214,7 @@ public class EnhancedDriver extends RemoteWebDriver {
 
     public WebElement getElementContainingTermsInsideElement(boolean asserted, By by, By elementWithText, boolean ignoreCase, int seconds, String... terms) {
         Timer timer = new Timer(seconds);
-        while (timer.hasMoreTime()) {
+        while (timer.stillCounting()) {
             List<WebElement> elements = getElements(asserted, by, seconds);
             implicitlyWaitOneSecond();
             for (WebElement element : elements) {
@@ -231,5 +232,28 @@ public class EnhancedDriver extends RemoteWebDriver {
         Assert.assertFalse(asserted, String.format("No element containing the '%s' terms was found after %d seconds!", StringUtils.getVarargsAsString(terms),
                 seconds));
         return null;
+    }
+
+    public String getTextFromWebElement(By by, boolean canBeEmpty, int timeout){
+        Timer timer = new Timer(timeout);
+        while (timer.stillCounting()){
+            WebElement element = getElement(true, by, timeout);
+                try {
+                    String text = element.getText();
+                    if(canBeEmpty || !text.isEmpty()){
+                        return text;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    LOG.error(e.getMessage());
+                }
+            }
+        Assert.fail(String.format("The '%s' element does not have any text!", by));
+        return null;
+    }
+
+    public void verifyElementContainsTerms(By by, String... terms) {
+        String actualText = getTextFromWebElement(by, false, Time.MEDIUM);
+        BasePage.softAssert.assertTrue(StringUtils.checkIfTextContainsTerms(actualText, terms), String.format("The text of the '%s' element is '%s' but it should contain: %s!", actualText, by, StringUtils.getVarargsAsString(terms)));
     }
 }

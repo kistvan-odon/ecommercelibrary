@@ -1,11 +1,11 @@
 package ro.pages;
 
-import ro.utils.EnhancedDriver;
+import ro.utils.BasePage;
 
 /**
  * Created by Istvan on 29.03.2015.
  */
-public class Search {
-    public Search(EnhancedDriver driver) {
-    }
+public class Search extends BasePage {
+//    public Search(EnhancedDriver driver) {
+//    }
 }
