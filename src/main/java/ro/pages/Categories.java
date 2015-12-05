@@ -26,7 +26,7 @@ public class Categories extends BasePage {
 //        this.driver = driver;
 //    }
 
-    public void selectCategory(By categories, By categoryTitle, By subCategories, String... titles) {
+    public static void selectCategory(By categories, By categoryTitle, By subCategories, String... titles) {
         WebElement parentElement = null;
         for (int i = 0; i < titles.length; i++) {
             LOG.debug("i: {}", i);
